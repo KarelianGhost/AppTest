@@ -1,0 +1,17 @@
+---
+name: Tests
+
+on: push
+
+jobs:
+  tests:
+    name: Unit Testing
+    runs-on: windows-latest
+    steps:
+      - name: Run automated unit and integration tests
+        run: dotnet test AppTest/AppTestTests/AppTestTests.csproj  /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+      - name: Publish coverage report to coveralls.io   
+        uses: coverallsapp/github-action@master   
+        with:
+            github-token: ${{ secrets.GITHUB_TOKEN }} 
+            path-to-lcov: AppTest/AppTestTests/TestResults/coverage.info 
