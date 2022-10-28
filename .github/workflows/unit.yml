@@ -14,10 +14,7 @@ jobs:
         with:
           dotnet-version: 5.0.x
       - name: Generate coverage report
-        run: dotnet test ./AppTestTests/ \
-          "/p:CollectCoverage=true"  \
-          "/p:CoverletOutput=TestResults/" \
-          "/p:CoverletOutputFormat=lcov"
+        run: dotnet test ./AppTestTests/ /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
       - name: Publish coverage report to coveralls.io
         uses: coverallsapp/github-action@master
         with:
