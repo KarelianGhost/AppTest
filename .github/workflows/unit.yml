@@ -1,26 +1,24 @@
----
-name: Tests
+name: dotnet package
 
-on: push
+on: [push]
 
 jobs:
-  tests:
-    name: Unit Testing
-    runs-on: windows-latest
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ['3.0', '3.1.x', '5.0.x' ]
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
         with:
-            dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: ${{ matrix.dotnet-version }}
       - name: Install dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build --configuration Release --no-restore   
-      - name: Run automated unit and integration tests
-        run: dotnet test C:/Testing/AppTest/AppTestTests/AppTestTests.csproj  /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
-      - name: Publish coverage report to coveralls.io   
-        uses: coverallsapp/github-action@master   
-        with:
-            github-token: ${{ secrets.GITHUB_TOKEN }} 
-            path-to-lcov: C:/Testing/AppTest/AppTestTests/TestResults/coverage.info 
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
