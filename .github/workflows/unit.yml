@@ -26,4 +26,5 @@ jobs:
         run: |
           cd ./MyLibrary/
           dotnet publish -c=Release
-          # deploy 
+          # deploy
+          
