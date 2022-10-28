@@ -8,6 +8,15 @@ jobs:
     name: Unit Testing
     runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+            dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore   
       - name: Run automated unit and integration tests
         run: dotnet test C:/Testing/AppTest/AppTestTests/AppTestTests.csproj  /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
       - name: Publish coverage report to coveralls.io   
