@@ -3,6 +3,8 @@ using System.IO;
 using System;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using AppTest;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace AppTestTests
 {
