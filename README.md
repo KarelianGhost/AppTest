@@ -1,3 +1,4 @@
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=KarelianGhost_AppTest)](https://sonarcloud.io/summary/new_code?id=KarelianGhost_AppTest)
 # AppTest
 Игра-бродилка, в которой игроку предстоит пройти через процедурно генерируемый лабиринт за определённое число ходов, забрать на своём пути сокровище и добраться до выхода.
 
