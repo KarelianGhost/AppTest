@@ -41,4 +41,132 @@
 
 ## Модульное тестирование
 
+### Тест GetMapValueFilled(Позитивный):
+Описание: Получение значения ячейки карты, если поле было заполнено ранее
+Функция: public int GetMapValue(Map map, MapLocation pos)
+Входные данные: game.data.map - карта для проверки, game.data.map.gridArray[1, 2] - значение установленной ячейки(1,2), new MapLocation(1, 2) - ссылка на поле карты(1,2)
+Ожидаемый результат: Значение равно ячейке (1,2)
+
+### Тест GetMapValueEmpty(Позитивный):
+Описание: Получение значения ячейки карты, если поле не было заполнено ранее
+Функция: public int GetMapValue(Map map, MapLocation pos)
+Входные данные: game.data.map - карта для проверки, game.data.map.gridArray[1, 2] - значение установленной ячейки(1,2), new MapLocation(1, 1) - ссылка на поле карты(1,1)
+Ожидаемый результат: Значения равно 0
+
+### Тест GetMapValueOutsideBounds(Негативный):
+Описание: Получение значения ячейки карты, если поле оказалось за пределами карты
+Функция: public int GetMapValue(Map map, MapLocation pos)
+Входные данные: game.data.map - карта для проверки, game.data.map.gridArray[1, 2] - значение установленной ячейки(1,2), new MapLocation(100, 100) - ссылка на поле карты(100,100)
+Ожидаемый результат: Значение равно -1
+
+### Тест SetMapValueInsideBounds(Позитивный):
+Описание: Установка значения ячейки карты, если поле оказалось в пределах карты
+Функция: public bool SetMapValue(Map map, MapLocation pos, int value)
+Входные данные: game.data.map - карта для проверки, game.data.map.gridArray[1, 2] - значение установленной ячейки(1,2), new MapLocation(1, 2) - ссылка на поле карты(1,2)
+Ожидаемый результат: Значение в ячейке (1,2) равно 2, функция вернула значение True
+
+### Тест SetMapValueOutsideBounds(Негативный):
+Описание: Установка значения ячейки карты, если поле оказалось за пределами карты
+Функция: public bool SetMapValue(Map map, MapLocation pos, int value)
+Входные данные: game.data.map - карта для проверки, game.data.map.gridArray[1, 2] - значение установленной ячейки(1,2), new MapLocation(100, 100) - ссылка на поле карты(100,100)
+Ожидаемый результат: Функция вернула значение False
+
+### Тест ClosedNodeExists(Позитивный):
+Описание:
+Функция: public bool isClosed(MapLocation pos, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест ClosedNodeNotExists(Негативный):
+Описание:
+Функция: public bool isClosed(MapLocation pos, GameData data)
+Входные данные:
+Ожидаемый результат:
+
 ## Интеграционное тестирование
+
+### Тест GetPathAny(Позитивный):
+Описание: Получение пути до указанной ячейки карты
+Функция: public List<Node> GetPath(MapLocation start, MapLocation target, GameData data)
+Входные данные: game.data.map - карта для проверки, new MapLocation(0, 1) - стартовая позиция на поле карты(0,1), new MapLocation(0, 2) - целевая позиция на поле карты(0,2)
+Ожидаемый результат: Возвращённый список узлов совпадает ожидаемому 
+
+### Тест GetPathShortest(Позитивный):
+Описание: Получение кратчайшего пути до указанной ячейки карты
+Функция: public List<Node> GetPath(MapLocation start, MapLocation target, GameData data)
+Входные данные: game.data.map - карта для проверки, new MapLocation(0, 1) - стартовая позиция на поле карты(0,1), new MapLocation(4, 1) - целевая позиция на поле карты(4,1)
+Ожидаемый результат: Возвращённый список узлов совпадает ожидаемому 
+
+### Тест CalculateShortestDistanceBetween1(Позитивный):
+Описание: Получение длины кратчайшего пути между двумя ячейками карты
+Функция: public int CalculateShortestDistanceBetween(MapLocation start, MapLocation target)
+Входные данные: game.data.map - карта для проверки, new MapLocation(0, 0) - стартовая позиция на поле карты(0,0), new MapLocation(0, 2) - целевая позиция на поле карты(0,2)
+Ожидаемый результат: Возвращённое значение равно 6
+
+### Тест CalculateShortestDistanceBetween2(Позитивный):
+Описание: Получение длины кратчайшего пути между двумя ячейками карты
+Функция: public int CalculateShortestDistanceBetween(MapLocation start, MapLocation target)
+Входные данные: game.data.map - карта для проверки, new MapLocation(0, 0) - стартовая позиция на поле карты(0,0), new MapLocation(4, 4) - целевая позиция на поле карты(4,4)
+Ожидаемый результат: Возвращённое значение равно 16
+
+### Тест MovePlayerNone(Позитивный):
+Описание:
+Функция: public void MovePlayer(Direction dir, GameData data)
+Входные данные: game.data.map - карта для проверки, new MapLocation(1, 1) - стартовая позиция игрока на поле карты(1,1), new MapLocation(4, 4) - целевая позиция на поле карты(4,4)
+Ожидаемый результат:
+
+### Тест MovePlayerLeft(Позитивный):
+Описание:
+Функция: public void MovePlayer(Direction dir, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест MovePlayerRight(Позитивный):
+Описание:
+Функция: public void MovePlayer(Direction dir, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест MovePlayerUp(Позитивный):
+Описание:
+Функция: public void MovePlayer(Direction dir, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест MovePlayerDown(Позитивный):
+Описание:
+Функция: public void MovePlayer(Direction dir, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест ChangePlayerPositionToEmptyCell(Позитивный):
+Описание:
+Функция: public bool ChangePlayerPosition(MapLocation targetPos, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест ChangePlayerPositionToWallCell(Негативный):
+Описание:
+Функция: public bool ChangePlayerPosition(MapLocation targetPos, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест ChangePlayerPositionFromExitCell(Позитивный):
+Описание:
+Функция: public bool ChangePlayerPosition(MapLocation targetPos, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест SearchIteration(Позитивный):
+Описание:
+Функция: public void Search(Node thisNode, GameData data)
+Входные данные:
+Ожидаемый результат:
+
+### Тест CheckTreasurePlacement(Позитивный):
+Описание:
+Функция: public void SetRandomTreasurePosition(GameData data)
+Входные данные:
+Ожидаемый результат:
+
+
