@@ -84,6 +84,9 @@ namespace AppTest
                         case (int)CellType.treasure:
                             pBox.BackColor = Color.Gold;
                             break;
+                        case (int)CellType.bonus:
+                            pBox.BackColor = Color.ForestGreen;
+                            break;
                     }
 
                     groupBox1.Controls.Add(pBox);
@@ -100,6 +103,7 @@ namespace AppTest
         public void UpdateTurnAmount(GameData data)
         {
             label1.Text = data.turnAmount.ToString();
+            label2.Text = "+ " + data.bonusTurnAmount.ToString();
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
@@ -160,6 +164,7 @@ namespace AppTest
 
             gridArray = new int[width, height];
         }
+
     }
 
     public class Node
@@ -195,16 +200,19 @@ namespace AppTest
         wall,
         player,
         exit,
-        treasure
+        treasure,
+        bonus
     }
 
     public class GameData
     {
         public int turnAmount;
+        public int bonusTurnAmount;
         public Timer gameTicker;
         public MapLocation exitPos;
         public MapLocation playerPos;
         public MapLocation treasurePos;
+        public List<MapLocation> bonusPosList;
         public bool isTreasureCollected;
         public Direction playerMovementDirection;
         public Map map;
@@ -212,6 +220,8 @@ namespace AppTest
         public int height;
         public int cellSize;
         public int spaceBetweenCells;
+        public int level;
+        public int bonusAmount;
         public List<Node> path;
         public List<Node> open;
         public List<Node> closed;
@@ -226,6 +236,8 @@ namespace AppTest
             path = new List<Node>();
             open = new List<Node>();
             closed = new List<Node>();
+            bonusPosList = new List<MapLocation>();
+            bonusTurnAmount = 0;
         }
     }
 
@@ -241,20 +253,34 @@ namespace AppTest
         public void GameInit(GameData data)
         {
             data.turnAmount = 0;
-            data.width = 15;
-            data.height = 15;
+            data.level = 0;
             data.cellSize = 20;
+            GenerateLevel(data);
+        }
+
+        public void GenerateLevel(GameData data)
+        {
+            SetMapSize(data, data.level);
             data.map = new Map(data.width, data.height);
             data.playerPos = new MapLocation(1, 1);
             data.exitPos = new MapLocation(data.width - 2, data.height - 2);
             data.playerMovementDirection = Direction.none;
             data.isTreasureCollected = false;
+            data.bonusAmount = data.level / 2;
+            data.bonusPosList.Clear();
             GenerateMaze(data);
-            ChangePlayerPosition(data.playerPos, data);
-            SetExitPosition(data.exitPos, data);
+            SetMapValue(data.map, data.playerPos, (int)CellType.player);
+            SetRandomExitPosition(data);
             SetRandomTreasurePosition(data);
+            SetRandomBonusPosition(data, data.bonusAmount);
             data.turnAmount += CalculateShortestDistanceBetween(data.playerPos, data.treasurePos);
             data.turnAmount += CalculateShortestDistanceBetween(data.treasurePos, data.exitPos) + 1;
+        }
+
+        public void SetMapSize(GameData data, int level)
+        {
+            data.width = 7 + level * 2;
+            data.height = 7 + level * 2;
         }
 
         public bool SetMapValue(Map map, MapLocation pos, int value)
@@ -282,28 +308,34 @@ namespace AppTest
             }
         }
 
-        public void MovePlayer(Direction dir, GameData data)
+        public bool MovePlayer(Direction dir, GameData data)
         {
-            switch (dir)
+            if (!CheckGameOver(data)){
+                switch (dir)
+                {
+                    case Direction.none:
+                        break;
+                    case Direction.up:
+                        ChangePlayerPosition(new MapLocation(data.playerPos.x, data.playerPos.y - 1), data);
+                        data.playerMovementDirection = Direction.none;
+                        break;
+                    case Direction.down:
+                        ChangePlayerPosition(new MapLocation(data.playerPos.x, data.playerPos.y + 1), data);
+                        data.playerMovementDirection = Direction.none;
+                        break;
+                    case Direction.left:
+                        ChangePlayerPosition(new MapLocation(data.playerPos.x - 1, data.playerPos.y), data);
+                        data.playerMovementDirection = Direction.none;
+                        break;
+                    case Direction.right:
+                        ChangePlayerPosition(new MapLocation(data.playerPos.x + 1, data.playerPos.y), data);
+                        data.playerMovementDirection = Direction.none;
+                        break;
+                }
+                return true;
+            } else
             {
-                case Direction.none:
-                    break;
-                case Direction.up:
-                    ChangePlayerPosition(new MapLocation(data.playerPos.x, data.playerPos.y - 1), data);
-                    data.playerMovementDirection = Direction.none;
-                    break;
-                case Direction.down:
-                    ChangePlayerPosition(new MapLocation(data.playerPos.x, data.playerPos.y + 1), data);
-                    data.playerMovementDirection = Direction.none;
-                    break;
-                case Direction.left:
-                    ChangePlayerPosition(new MapLocation(data.playerPos.x - 1, data.playerPos.y), data);
-                    data.playerMovementDirection = Direction.none;
-                    break;
-                case Direction.right:
-                    ChangePlayerPosition(new MapLocation(data.playerPos.x + 1, data.playerPos.y), data);
-                    data.playerMovementDirection = Direction.none;
-                    break;
+                return false;
             }
         }
         public bool ChangePlayerPosition(MapLocation targetPos, GameData data)
@@ -320,9 +352,10 @@ namespace AppTest
                 }
                 SetMapValue(data.map, targetPos, (int)CellType.player);
                 data.playerPos = targetPos;
+                WithdrawMove(data);
                 CheckTreasure(data);
                 CheckExit(data);
-                data.turnAmount--;
+                CheckBonus(data);
                 return true;
             }
             else
@@ -330,9 +363,34 @@ namespace AppTest
                 return false;
             }
         }
-        public void SetExitPosition(MapLocation targetPos, GameData data)
+        public bool WithdrawMove(GameData data)
         {
-            SetMapValue(data.map, targetPos, (int)CellType.exit);
+            if (data.turnAmount > 0)
+            {
+                data.turnAmount--;
+                return false;
+            } else
+            {
+                data.bonusTurnAmount--;
+                return true;
+            }
+        }
+
+        public void SetRandomExitPosition(GameData data)
+        {
+            data.exitPos = new MapLocation(0, 0);
+            bool isExitPlaced = false;
+            Random rng = new Random();
+            while (!isExitPlaced)
+            {
+                data.exitPos.x = rng.Next(data.width);
+                data.exitPos.y = rng.Next(data.height);
+                if (GetMapValue(data.map, new MapLocation(data.exitPos.x, data.exitPos.y)) == (int)CellType.empty)
+                {
+                    isExitPlaced = true;
+                    SetMapValue(data.map, new MapLocation(data.exitPos.x, data.exitPos.y), (int)CellType.exit);
+                }
+            }
         }
         public void SetRandomTreasurePosition(GameData data)
         {
@@ -350,6 +408,36 @@ namespace AppTest
                 }
             }
         }
+
+        public void SetRandomBonusPosition(GameData data, int amount)
+        {
+            MapLocation bonusPos = new MapLocation(0, 0);
+            Random rng = new Random();
+            for (int i = 0; i < amount; i++)
+            {
+                bool isBonusPlaced = false;
+                while (!isBonusPlaced)
+                {
+                    bonusPos.x = rng.Next(data.width);
+                    bonusPos.y = rng.Next(data.height);
+                    if (GetMapValue(data.map, new MapLocation(bonusPos.x, bonusPos.y)) == (int)CellType.empty)
+                    {
+                        isBonusPlaced = true;
+                        SetMapValue(data.map, new MapLocation(bonusPos.x, bonusPos.y), (int)CellType.bonus);
+                        data.bonusPosList.Add(new MapLocation(bonusPos.x, bonusPos.y));
+                    }
+                }
+            }
+        }
+        public void CheckBonus(GameData data)
+        {
+            if (data.bonusPosList.Contains(data.playerPos))
+            {
+                data.bonusPosList.Remove(data.playerPos);
+                data.bonusTurnAmount += 5;
+            }
+        }
+
         public void CheckTreasure(GameData data)
         {
             if (data.playerPos.Equals(data.treasurePos))
@@ -357,18 +445,35 @@ namespace AppTest
                 data.isTreasureCollected = true;
             }
         }
-        public void CheckExit(GameData data)
+        public bool CheckExit(GameData data)
         {
             if (data.playerPos.Equals(data.exitPos))
             {
                 if (data.isTreasureCollected)
                 {
-                    Console.WriteLine("You successfully escaped");
+                    data.level++;
+                    GenerateLevel(data);
+                    return true;
                 }
                 else
                 {
                     Console.WriteLine("I will not go without a treasure");
+                    return false;
                 }
+            } else
+            {
+                return false;
+            }
+        }
+        public bool CheckGameOver(GameData data)
+        {
+            if (data.bonusTurnAmount + data.turnAmount <= 0)
+            {
+                Console.WriteLine("Out of moves!");
+                return true;
+            } else
+            {
+                return false;
             }
         }
         public void GenerateMaze(GameData data)
