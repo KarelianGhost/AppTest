@@ -213,6 +213,7 @@ namespace AppTestTests
             game.data.height = 3;
             game.data.width = 3;
             game.data.map = new Map(3, 3);
+            game.data.turnAmount = 1;
             game.data.playerMovementDirection = Direction.up;
             game.data.playerPos = new MapLocation(1, 1);
             game.data.map.gridArray[1, 1] = (int)CellType.player;
@@ -230,6 +231,7 @@ namespace AppTestTests
             game.data.height = 3;
             game.data.width = 3;
             game.data.map = new Map(3, 3);
+            game.data.turnAmount = 1;
             game.data.playerMovementDirection = Direction.down;
             game.data.playerPos = new MapLocation(1, 1);
             game.data.map.gridArray[1, 1] = (int)CellType.player;
@@ -247,6 +249,7 @@ namespace AppTestTests
             game.data.height = 3;
             game.data.width = 3;
             game.data.map = new Map(3, 3);
+            game.data.turnAmount = 1;
             game.data.playerMovementDirection = Direction.left;
             game.data.playerPos = new MapLocation(1, 1);
             game.data.map.gridArray[1, 1] = (int)CellType.player;
@@ -264,6 +267,7 @@ namespace AppTestTests
             game.data.height = 3;
             game.data.width = 3;
             game.data.map = new Map(3, 3);
+            game.data.turnAmount = 1;
             game.data.playerMovementDirection = Direction.right;
             game.data.playerPos = new MapLocation(1, 1);
             game.data.map.gridArray[1, 1] = (int)CellType.player;
@@ -338,6 +342,225 @@ namespace AppTestTests
             Assert.AreEqual((int)CellType.player, newPosCell);
             Assert.AreEqual(true, res);
             Assert.AreEqual(0, game.data.turnAmount);
+        }
+    }
+    [TestClass]
+    public class SearchTest
+    {
+        [TestMethod]
+        public void SearchIteration()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.height = 3;
+            game.data.width = 3;
+            game.data.map = new Map(3, 3);
+            game.data.map.gridArray[0, 1] = (int)CellType.wall;
+            game.data.map.gridArray[1, 1] = (int)CellType.wall;
+            game.data.startNode = new Node(new MapLocation(0, 0), 0, 0, 0, null);
+            game.data.goalNode = new Node(new MapLocation(0, 2), 0, 0, 0, null);
+            game.data.open.Add(game.data.startNode);
+            game.data.lastPos = game.data.startNode;
+
+            game.Search(game.data.lastPos, game.data);
+
+            List<MapLocation> expectedOpen = new List<MapLocation>();
+            List<MapLocation> actualOpen = new List<MapLocation>();
+            foreach (Node n in game.data.open)
+            {
+                actualOpen.Add(n.pos);
+            }
+            List<MapLocation> expectedClosed = new List<MapLocation>();
+            List<MapLocation> actualClosed = new List<MapLocation>();
+            foreach (Node n in game.data.closed)
+            {
+                actualClosed.Add(n.pos);
+            }
+            expectedClosed.Add(new MapLocation(0, 0));
+            expectedOpen.Add(new MapLocation(1, 0));
+
+            bool closedListsEqual = expectedClosed.SequenceEqual(actualClosed);
+            bool openListsEqual = expectedOpen.SequenceEqual(actualOpen);
+            Assert.AreEqual(closedListsEqual, true);
+            Assert.AreEqual(openListsEqual, true);
+        }
+    }
+
+    [TestClass]
+    public class SetRandomTreasurePositionTest
+    {
+        [TestMethod]
+        public void CheckTreasurePlacement()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.height = 3;
+            game.data.width = 3;
+            game.data.map = new Map(3, 3);
+
+            game.SetRandomTreasurePosition(game.data);
+
+            bool isTreasurePlaced = false;
+
+            for (int i = 0; i < game.data.height; i++)
+            {
+                for (int j = 0; j < game.data.width; j++)
+                {
+                    if (game.data.map.gridArray[i, j] == (int)CellType.treasure)
+                    {
+                        isTreasurePlaced = true; break;
+                    }
+                }
+            }
+
+            Assert.AreEqual(isTreasurePlaced, true);
+
+        }
+    }
+    [TestClass]
+    public class IsClosedTest
+    {
+        [TestMethod]
+        public void ClosedNodeExists()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.height = 3;
+            game.data.width = 3;
+            game.data.map = new Map(3, 3);
+
+            game.data.closed.Add(new Node(new MapLocation(0, 0), 0, 0, 0, null));
+            game.data.closed.Add(new Node(new MapLocation(2, 3), 0, 0, 0, null));
+            game.data.closed.Add(new Node(new MapLocation(4, 6), 0, 0, 0, null));
+            game.data.closed.Add(new Node(new MapLocation(3, 1), 0, 0, 0, null));
+
+
+            Assert.AreEqual(game.isClosed(new MapLocation(2, 3), game.data), true);
+
+        }
+        [TestMethod]
+        public void ClosedNodeNotExists()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.height = 3;
+            game.data.width = 3;
+            game.data.map = new Map(3, 3);
+
+            game.data.closed.Add(new Node(new MapLocation(0, 0), 0, 0, 0, null));
+            game.data.closed.Add(new Node(new MapLocation(2, 3), 0, 0, 0, null));
+            game.data.closed.Add(new Node(new MapLocation(4, 6), 0, 0, 0, null));
+            game.data.closed.Add(new Node(new MapLocation(3, 1), 0, 0, 0, null));
+
+
+            Assert.AreEqual(game.isClosed(new MapLocation(5, 3), game.data), false);
+
+        }
+    }
+    [TestClass]
+    public class WithdrawMoveTest
+    {
+        [TestMethod]
+        public void WithdrawBonusTurn()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.turnAmount = 0;
+            game.data.bonusTurnAmount = 1;
+            bool result = game.WithdrawMove(game.data);
+
+            Assert.AreEqual(true, result);
+            Assert.AreEqual(0, game.data.turnAmount);
+            Assert.AreEqual(0, game.data.bonusTurnAmount);
+        }
+        [TestMethod]
+        public void WithdrawBaseTurn()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.turnAmount = 1;
+            game.data.bonusTurnAmount = 0;
+            bool result = game.WithdrawMove(game.data);
+
+            Assert.AreEqual(false, result);
+            Assert.AreEqual(0, game.data.turnAmount);
+            Assert.AreEqual(0, game.data.bonusTurnAmount);
+        }
+    }
+    [TestClass]
+    public class SetMapSizeTest
+    {
+        [TestMethod]
+        public void SetMapSize1()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.turnAmount = 0;
+            game.data.bonusTurnAmount = 1;
+            game.data.level = 4;
+            game.SetMapSize(game.data, game.data.level);
+
+            Assert.AreEqual(15, game.data.height);
+            Assert.AreEqual(15, game.data.width);
+        }
+        [TestMethod]
+        public void SetMapSize2()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.turnAmount = 0;
+            game.data.bonusTurnAmount = 1;
+            game.data.level = 9;
+            game.SetMapSize(game.data, game.data.level);
+
+            Assert.AreEqual(25, game.data.height);
+            Assert.AreEqual(25, game.data.width);
+        }
+    }
+    [TestClass]
+    public class CheckGameOverTest
+    {
+        [TestMethod]
+        public void NotGameOverBoth()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.turnAmount = 2;
+            game.data.bonusTurnAmount = 1;
+            bool result = game.CheckGameOver(game.data);
+
+            Assert.AreEqual(false, result);
+        }
+        public void NotGameOverBonus()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.turnAmount = 0;
+            game.data.bonusTurnAmount = 1;
+            bool result = game.CheckGameOver(game.data);
+
+            Assert.AreEqual(false, result);
+        }
+        public void NotGameOverBase()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.turnAmount = 2;
+            game.data.bonusTurnAmount = 0;
+            bool result = game.CheckGameOver(game.data);
+
+            Assert.AreEqual(false, result);
+        }
+        [TestMethod]
+        public void GameOver()
+        {
+            GameData data = new GameData();
+            Game game = new Game(data);
+            game.data.turnAmount = 0;
+            game.data.bonusTurnAmount = 0;
+            bool result = game.CheckGameOver(game.data);
+
+            Assert.AreEqual(true, result);
         }
     }
 }
