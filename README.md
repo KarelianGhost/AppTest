@@ -260,3 +260,39 @@
 Функция: public void SetRandomTreasurePosition(GameData data)
 Входные данные: game.data.map - карта для проверки
 Ожидаемый результат: Одна из клеток поля карты принимает значение CellType.treasure
+
+### Тест CheckExitPlacement(Позитивный)[Дмитрий]:
+Описание: Установка выхода в случайную точку на карте
+Функция: public void SetRandomExitPosition(GameData data)
+Входные данные: game.data.map - карта для проверки
+Ожидаемый результат: Одна из клеток поля карты принимает значение CellType.exit
+
+### Тест CheckBonusPlacement1(Позитивный)[Дмитрий]:
+Описание: Установка бонуса в случайную точку на карте
+Функция: public void SetRandomBonusPosition(GameData data, int amount)
+Входные данные: game.data.map - карта для проверки, int amount - количество бонусов
+Ожидаемый результат: Одна из клеток поля карты принимает значение CellType.bonus
+
+### Тест CheckBonusPlacement2(Позитивный)[Дмитрий]:
+Описание: Установка бонуса в случайную точку на карте
+Функция: public void SetRandomBonusPosition(GameData data, int amount)
+Входные данные: game.data.map - карта для проверки, int amount - количество бонусов
+Ожидаемый результат: Одна из клеток поля карты принимает значение CellType.bonus
+
+### Тест CheckPlayerNotOnExit(Негативный)[Дмитрий]:
+Описание: Проверка выхода в случае, если игрок не находится в точке выхода
+Функция: public void CheckExit(GameData data)
+Входные данные: game.data.map - карта для проверки, new MapLocation(0, 0) - стартовая позиция игрока на поле карты(0,0), new MapLocation(1, 0) - позиция выхода на поле карты(1,0)
+Ожидаемый результат: Функция вернула значение False
+
+### Тест CheckTreasureNotCollected(Негативный)[Дмитрий]:
+Описание: Проверка выхода в случае, если игрок находится в точке выхода и сокровище не собрано
+Функция: public void CheckExit(GameData data)
+Входные данные: game.data.isTreasureCollected - подобрано ли сокровище, game.data.map - карта для проверки, new MapLocation(0, 0) - стартовая позиция игрока на поле карты(0,0), new MapLocation(0, 0) - позиция выхода на поле карты(0,0)
+Ожидаемый результат: Функция вернула значение False
+  
+### Тест CheckTreasureCollected(Позитивный)[Дмитрий]:
+Описание: Проверка выхода в случае, если игрок находится в точке выхода и сокровище собрано
+Функция: public void CheckExit(GameData data)
+Входные данные: game.data.isTreasureCollected - подобрано ли сокровище, game.data.map - карта для проверки, new MapLocation(0, 0) - стартовая позиция игрока на поле карты(0,0), new MapLocation(0, 0) - позиция выхода на поле карты(0,0)
+Ожидаемый результат: Функция вернула значение True
